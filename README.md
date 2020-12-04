@@ -35,4 +35,8 @@ Client:
 - In an underground go routine, the client calls /api/receive_message every 1s to receive new messages
 
 - otherwise, client wait for input form Stdin, if Enter is pushed, 
-it sends the last sentence to server with /api/send_messag
+it sends the last sentence to server with /api/send_message
+
+# Build & Deploy server
+
+# Start client against deployed server
