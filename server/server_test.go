@@ -11,7 +11,7 @@ func TestServerRegister(t *testing.T) {
 		clientName := "TestClient"
 		invalidClientName := "InvalidClient"
 
-		msg := &message.RegisterMessage{
+		msg := message.RegisterMessage{
 			ClientName: clientName,
 		}
 		server.Register(msg)
@@ -28,7 +28,7 @@ func TestServerSendMessage(t *testing.T) {
 	t.Run("Server should accept message sent from client", func(t *testing.T) {
 		server := &ChatServer{}
 		clientName := "ValidClient"
-		registerMessage := &message.RegisterMessage{
+		registerMessage := message.RegisterMessage{
 			ClientName: clientName,
 		}
 		server.Register(registerMessage)
@@ -59,6 +59,41 @@ func TestServerSendMessage(t *testing.T) {
 		err := server.ProcessMessage(msg)
 		if err != ErrClientNotAccepted {
 			t.Fatalf("Server should not accept message from client. Got: %v", err)
+		}
+	})
+}
+
+func TestGetMessage(t *testing.T)  {
+	t.Run("Server should return all messages after a timestamp", func(t *testing.T) {
+		server := ChatServer{}
+		client := "ClientName"
+		registerMessage := message.RegisterMessage{
+			ClientName: client,
+		}
+
+		server.Register(registerMessage)
+
+		m := "Hello Server"
+		msg := message.ChatMessage{
+			ClientName: client,
+			Message:    m,
+			Timestamp:  "1",
+		}
+		server.ProcessMessage(msg)
+		msg2 := message.ChatMessage{
+			ClientName: client,
+			Message:    m,
+			Timestamp:  "2",
+		}
+		server.ProcessMessage(msg2)
+
+		messages := server.GetMessageAfter("1")
+
+		if len(messages) != 1 {
+			t.Fatalf("Server does not return messages correctly. Expected 1 message, got %v", messages)
+		}
+		if messages[0].Message != m {
+			t.Fatalf("Server return wrong message, want %s, got %s", m, messages[0])
 		}
 	})
 }

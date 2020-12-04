@@ -10,7 +10,7 @@ type ChatServer struct {
 	ChatMessages []message.ChatMessage
 }
 
-func (s *ChatServer) Register(msg *message.RegisterMessage) {
+func (s *ChatServer) Register(msg message.RegisterMessage) {
 	s.Clients = append(s.Clients, msg.ClientName)
 }
 
@@ -35,3 +35,12 @@ func (s *ChatServer) ProcessMessage(msg message.ChatMessage) error {
 	return ErrClientNotAccepted
 }
 
+func (s *ChatServer) GetMessageAfter(timestamp string) []message.ChatMessage {
+	result := []message.ChatMessage{}
+	for _, msg := range s.ChatMessages {
+		if msg.Timestamp > timestamp {
+			result = append(result, msg)
+		}
+	}
+	return result
+}
