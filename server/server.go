@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/3cham/hackathon-chatbot/message"
 	"log"
 	"net/http"
@@ -44,7 +45,7 @@ func (s *ChatServer) ProcessMessage(msg message.ChatMessage) error {
 			saveMsg := message.ChatMessage{
 				ClientName: msg.ClientName,
 				Message: msg.Message,
-				Timestamp: time.Now().String(),
+				Timestamp: fmt.Sprint(time.Now().Unix()),
 			}
 			s.db.SaveChatMessage(saveMsg)
 		} else {

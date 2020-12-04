@@ -45,9 +45,14 @@ func (c ChatClient) Register() {
 }
 
 func (c ChatClient) ReceiveMessage() {
-	for ;; {
+	lastTimestamp := "0"
+	for {
 		time.Sleep(5 * time.Second)
-		fmt.Printf("Message from: %v\n", time.Now())
+
+		newMessages := c.GetMessage(lastTimestamp)
+		if len(newMessages) > 0 {
+			lastTimestamp = c.printOut(newMessages)
+		}
 	}
 }
 
@@ -61,6 +66,28 @@ func (c ChatClient) SendMessage(text string) {
 	json.NewEncoder(body).Encode(chatMessage)
 
 	c.client.Post(c.ServerAddress + "/api/send_message", ContentType, body)
+}
+
+func (c ChatClient) GetMessage(timestamp string) []message.ChatMessage{
+
+	response, _ := c.client.Get(c.ServerAddress + "/api/get_messages?from=" + timestamp)
+	messages := &[]message.ChatMessage{}
+
+	json.NewDecoder(response.Body).Decode(messages)
+	return *messages
+}
+
+func (c ChatClient) printOut(messages []message.ChatMessage) string {
+	newTimestamp := ""
+	for _, msg := range messages {
+		if msg.ClientName != c.Name {
+			fmt.Printf("%s: %s", msg.ClientName, msg.Message)
+		}
+		if msg.Timestamp > newTimestamp {
+			newTimestamp = msg.Timestamp
+		}
+	}
+	return newTimestamp
 }
 
 func NewChatClient(serverAdd string, name string) {
