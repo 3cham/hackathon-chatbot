@@ -7,7 +7,7 @@ Server & Client run inside a docker container
 Server:
 - The central point, which clients could register & send message to
 
-- /api/register -> POST data = { "client-name": "", "ip": "" }
+- /api/register -> POST data = { "client-name": "" }
     The information is saved in a file
 
 - /api/send_message
