@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/3cham/hackathon-chatbot/message"
+	"log"
 	"net/http"
 	"net/url"
 	"time"
@@ -63,6 +64,7 @@ func (s *ChatServer) HandleRegister(writer http.ResponseWriter, request *http.Re
 	if err := json.NewDecoder(request.Body).Decode(msg); err == nil && msg.ClientName != "" {
 		s.Register(*msg)
 		writer.WriteHeader(http.StatusAccepted)
+		log.Printf("Client with name %s registered", msg.ClientName)
 		return
 	}
 	writer.WriteHeader(http.StatusNotAcceptable)
@@ -73,6 +75,7 @@ func (s *ChatServer) HandleSendMessage(writer http.ResponseWriter, request *http
 	if err := json.NewDecoder(request.Body).Decode(msg); err == nil && msg.ClientName != "" && msg.Message != "" {
 		if err := s.ProcessMessage(*msg); err == nil {
 			writer.WriteHeader(http.StatusAccepted)
+			log.Printf("Message from client with name %s saved", msg.ClientName)
 			return
 		}
 	}
@@ -94,6 +97,11 @@ func (s *ChatServer) HandleGetMessage(writer http.ResponseWriter, request *http.
 	writer.WriteHeader(http.StatusBadRequest)
 }
 
-func NewChatServer() *ChatServer {
-	return &ChatServer{&InmemoryDatabase{}}
+func NewChatServer() {
+	log.Printf("Start server")
+	srv := &ChatServer{&InmemoryDatabase{}}
+
+	if err := http.ListenAndServe(":5000", srv); err != nil {
+		log.Fatalf("could not listen on port 5000 %v", err)
+	}
 }
