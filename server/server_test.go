@@ -7,7 +7,9 @@ import (
 
 func TestServerRegister(t *testing.T) {
 	t.Run("Server should accept register from client", func(t *testing.T) {
-		server := &ChatServer{}
+		server := &ChatServer{
+			db: &InmemoryDatabase{},
+		}
 		clientName := "TestClient"
 		invalidClientName := "InvalidClient"
 
@@ -26,7 +28,9 @@ func TestServerRegister(t *testing.T) {
 
 func TestServerSendMessage(t *testing.T) {
 	t.Run("Server should accept message sent from client", func(t *testing.T) {
-		server := &ChatServer{}
+		server := &ChatServer{
+			db: &InmemoryDatabase{},
+		}
 		clientName := "ValidClient"
 		registerMessage := message.RegisterMessage{
 			ClientName: clientName,
@@ -43,13 +47,15 @@ func TestServerSendMessage(t *testing.T) {
 			t.Fatalf("Error is not expected because client has been registered. Got: %v", err)
 		}
 
-		if len(server.ChatMessages) == 0 {
+		if len(server.GetMessageAfter("0")) == 0 {
 			t.Fatalf("Message is currently not saved inside the server")
 		}
 	})
 
 	t.Run("Server should not accept message sent from invalid client", func(t *testing.T) {
-		server := &ChatServer{}
+		server := &ChatServer{
+			db: &InmemoryDatabase{},
+		}
 		clientName := "invalidClient"
 		msg := message.ChatMessage{
 			ClientName: clientName,
@@ -65,7 +71,7 @@ func TestServerSendMessage(t *testing.T) {
 
 func TestGetMessage(t *testing.T)  {
 	t.Run("Server should return all messages after a timestamp", func(t *testing.T) {
-		server := ChatServer{}
+		server := ChatServer{db: &InmemoryDatabase{}}
 		client := "ClientName"
 		registerMessage := message.RegisterMessage{
 			ClientName: client,
