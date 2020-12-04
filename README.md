@@ -39,4 +39,20 @@ it sends the last sentence to server with /api/send_message
 
 # Build & Deploy server
 
+```bash§
+# Build docker container
+docker build . -t hackathon-chatserver:latest
+
+# start the server 
+docker run -d -p 8080:5000 hackathon-chatserver:latest
+``` 
+
+
 # Start client against deployed server
+
+```bash
+#build the client
+go build -o cli
+
+./cli -type client -name YourName -address http://asprd02.ov.otto.de:8080
+```

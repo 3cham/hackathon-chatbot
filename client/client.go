@@ -47,7 +47,7 @@ func (c ChatClient) Register() {
 func (c ChatClient) ReceiveMessage() {
 	lastTimestamp := "0"
 	for {
-		time.Sleep(5 * time.Second)
+		time.Sleep(1 * time.Second)
 
 		newMessages := c.GetMessage(lastTimestamp)
 		if len(newMessages) > 0 {
