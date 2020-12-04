@@ -138,3 +138,42 @@ func TestChatServer_HandleRegister(t *testing.T) {
 	})
 
 }
+
+func TestChatServer_HandleSendMessage(t *testing.T) {
+	t.Run("Server should accept message request from valid client over HTTP", func(t *testing.T) {
+		srv := &ChatServer{&InmemoryDatabase{}}
+
+		response := httptest.NewRecorder()
+		body := &strings.Reader{}
+		body.Reset(`{ "ClientName": "TestClient", "Message": "Hello Server"}`)
+		request, _ := http.NewRequest(http.MethodPost, "/api/send_message", body)
+
+		srv.ServeHTTP(response, request)
+		if response.Code != http.StatusNotAcceptable {
+			t.Fatalf("unregistered request is not accepted. Got: %d", response.Code)
+		}
+
+		// Now register client must be done
+
+		body = &strings.Reader{}
+		body.Reset("{ \"ClientName\": \"TestClient\"}")
+		request, _ = http.NewRequest(http.MethodPost, "/api/register", body)
+		response = httptest.NewRecorder()
+		srv.ServeHTTP(response, request)
+
+		if response.Code != http.StatusAccepted {
+			t.Fatalf("Register request is not accepted. Got: %d", response.Code)
+		}
+
+		// Now client could send message to server
+		response = httptest.NewRecorder()
+		body = &strings.Reader{}
+		body.Reset(`{ "ClientName": "TestClient", "Message": "Hello Server"}`)
+		request, _ = http.NewRequest(http.MethodPost, "/api/send_message", body)
+
+		srv.ServeHTTP(response, request)
+		if response.Code != http.StatusAccepted {
+			t.Fatalf("Request should be accepted. Got: %d", response.Code)
+		}
+	})
+}

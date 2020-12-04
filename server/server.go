@@ -17,7 +17,7 @@ func (s *ChatServer) ServeHTTP(writer http.ResponseWriter, request *http.Request
 		s.HandleRegister(writer, request)
 	} else
 	if request.URL.String() == "/api/send_message" {
-		//s.HandleSendMessage(writer, request)
+		s.HandleSendMessage(writer, request)
 	} else
 	if request.URL.String() == "/api/get_messages" {
 		//s.HandleGetMessage(writer, request)
@@ -63,6 +63,17 @@ func (s *ChatServer) HandleRegister(writer http.ResponseWriter, request *http.Re
 		s.Register(*msg)
 		writer.WriteHeader(http.StatusAccepted)
 		return
+	}
+	writer.WriteHeader(http.StatusNotAcceptable)
+}
+
+func (s *ChatServer) HandleSendMessage(writer http.ResponseWriter, request *http.Request) {
+	msg := &message.ChatMessage{}
+	if err := json.NewDecoder(request.Body).Decode(msg); err == nil && msg.ClientName != "" && msg.Message != "" {
+		if err := s.ProcessMessage(*msg); err == nil {
+			writer.WriteHeader(http.StatusAccepted)
+			return
+		}
 	}
 	writer.WriteHeader(http.StatusNotAcceptable)
 }
