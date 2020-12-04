@@ -86,7 +86,7 @@ func (s *ChatServer) HandleGetMessage(writer http.ResponseWriter, request *http.
 			if successful {
 				result := s.GetMessageAfter(fromTimestamp[0])
 				json.NewEncoder(writer).Encode(result)
-				writer.WriteHeader(http.StatusOK)
+				writer.Header().Set("content-type", "application/json")
 				return
 			}
 		}
