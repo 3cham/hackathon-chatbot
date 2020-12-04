@@ -1,13 +1,29 @@
 package server
 
 import (
+	"encoding/json"
 	"errors"
 	"github.com/3cham/hackathon-chatbot/message"
+	"net/http"
 	"time"
 )
 
 type ChatServer struct {
 	db ChatDatabase
+}
+
+func (s *ChatServer) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
+	if request.URL.String() == "/api/register" {
+		s.HandleRegister(writer, request)
+	} else
+	if request.URL.String() == "/api/send_message" {
+		//s.HandleSendMessage(writer, request)
+	} else
+	if request.URL.String() == "/api/get_messages" {
+		//s.HandleGetMessage(writer, request)
+	} else {
+		writer.WriteHeader(http.StatusNotFound)
+	}
 }
 
 func (s *ChatServer) Register(msg message.RegisterMessage) {
@@ -39,4 +55,18 @@ func (s *ChatServer) ProcessMessage(msg message.ChatMessage) error {
 
 func (s *ChatServer) GetMessageAfter(timestamp string) []message.ChatMessage {
 	return s.db.GetMessageAfter(timestamp)
+}
+
+func (s *ChatServer) HandleRegister(writer http.ResponseWriter, request *http.Request) {
+	msg := &message.RegisterMessage{}
+	if err := json.NewDecoder(request.Body).Decode(msg); err == nil && msg.ClientName != "" {
+		s.Register(*msg)
+		writer.WriteHeader(http.StatusAccepted)
+		return
+	}
+	writer.WriteHeader(http.StatusNotAcceptable)
+}
+
+func NewChatServer() *ChatServer {
+	return &ChatServer{&InmemoryDatabase{}}
 }

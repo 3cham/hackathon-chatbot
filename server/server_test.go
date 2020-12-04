@@ -2,6 +2,9 @@ package server
 
 import (
 	"github.com/3cham/hackathon-chatbot/message"
+	"net/http"
+	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -103,4 +106,35 @@ func TestGetMessage(t *testing.T)  {
 			t.Fatalf("Server does not return messages correctly. Expected 1 message, got %v", messages)
 		}
 	})
+}
+
+func TestChatServer_HandleRegister(t *testing.T) {
+	t.Run("Server should accept register request from client over HTTP", func(t *testing.T) {
+		srv := &ChatServer{&InmemoryDatabase{}}
+		body := &strings.Reader{}
+		body.Reset("{ \"ClientName\": \"TestClient\"}")
+		request, _ := http.NewRequest(http.MethodPost, "/api/register", body)
+
+		response := httptest.NewRecorder()
+		srv.ServeHTTP(response, request)
+
+		if response.Code != http.StatusAccepted {
+			t.Fatalf("Register request is not accepted. Got: %d", response.Code)
+		}
+	})
+
+	t.Run("Server should ignore invalid register request from client over HTTP", func(t *testing.T) {
+		srv := &ChatServer{&InmemoryDatabase{}}
+		body := &strings.Reader{}
+		body.Reset("{ \"Cname1\": \"TestClient\", \"Clientname1\":\"Test\"}")
+		request, _ := http.NewRequest(http.MethodPost, "/api/register", body)
+
+		response := httptest.NewRecorder()
+		srv.ServeHTTP(response, request)
+
+		if response.Code != http.StatusNotAcceptable {
+			t.Fatalf("Register request should not be accepted. Got: %d", response.Code)
+		}
+	})
+
 }

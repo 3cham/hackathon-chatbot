@@ -26,6 +26,10 @@ Server:
       }   
       ]
 
+JSON Parsing:
+ - key name is case insensitive
+ - JSON structure could be different, still be parsed if the keys are correct
+ 
 Client:
 - When the client is started, the IP address of the server must be provided beforehand
 - Call /api/register to server address to register itself with server
