@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/3cham/hackathon-chatbot/message"
 	"net/http"
+	"net/url"
 	"time"
 )
 
@@ -19,8 +20,8 @@ func (s *ChatServer) ServeHTTP(writer http.ResponseWriter, request *http.Request
 	if request.URL.String() == "/api/send_message" {
 		s.HandleSendMessage(writer, request)
 	} else
-	if request.URL.String() == "/api/get_messages" {
-		//s.HandleGetMessage(writer, request)
+	if request.URL.Path == "/api/get_messages" {
+		s.HandleGetMessage(writer, request)
 	} else {
 		writer.WriteHeader(http.StatusNotFound)
 	}
@@ -76,6 +77,21 @@ func (s *ChatServer) HandleSendMessage(writer http.ResponseWriter, request *http
 		}
 	}
 	writer.WriteHeader(http.StatusNotAcceptable)
+}
+
+func (s *ChatServer) HandleGetMessage(writer http.ResponseWriter, request *http.Request) {
+	if u, err := url.ParseRequestURI(request.URL.String()); err == nil {
+		if query, err := url.ParseQuery(u.RawQuery); err == nil {
+			fromTimestamp, successful := query["from"]
+			if successful {
+				result := s.GetMessageAfter(fromTimestamp[0])
+				json.NewEncoder(writer).Encode(result)
+				writer.WriteHeader(http.StatusOK)
+				return
+			}
+		}
+	}
+	writer.WriteHeader(http.StatusBadRequest)
 }
 
 func NewChatServer() *ChatServer {

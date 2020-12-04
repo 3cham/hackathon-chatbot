@@ -7,14 +7,13 @@ Server & Client run inside a docker container
 Server:
 - The central point, which clients could register & send message to
 
-- /api/register -> POST data = { "client-name": "" }
+- /api/register -> POST data = { "clientname": "" }
     The information is saved in a file
 
 - /api/send_message
-    -> POST data { "client-name": "", "message": "" }
+    -> POST data { "clientname": "", "message": "" }
     
-- /api/receive_message 
-   GET data { "from-timestamp": "" }
+- /api/get_messages?from={STARTTIME}
    -> [
     { "client-name": "",
       "message": "",

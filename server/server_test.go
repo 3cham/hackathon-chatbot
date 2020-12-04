@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"github.com/3cham/hackathon-chatbot/message"
 	"net/http"
 	"net/http/httptest"
@@ -174,6 +175,45 @@ func TestChatServer_HandleSendMessage(t *testing.T) {
 		srv.ServeHTTP(response, request)
 		if response.Code != http.StatusAccepted {
 			t.Fatalf("Request should be accepted. Got: %d", response.Code)
+		}
+	})
+}
+
+
+func TestChatServer_HandleGetMessage(t *testing.T) {
+	t.Run("Server should accept message request from valid client over HTTP", func(t *testing.T) {
+		srv := &ChatServer{&InmemoryDatabase{}}
+
+		response := httptest.NewRecorder()
+		body := &strings.Reader{}
+
+		body.Reset("{ \"ClientName\": \"TestClient\"}")
+		request, _ := http.NewRequest(http.MethodPost, "/api/register", body)
+		srv.ServeHTTP(response, request)
+
+
+		// Now client could send message to server
+		response = httptest.NewRecorder()
+		body = &strings.Reader{}
+		body.Reset(`{ "ClientName": "TestClient", "Message": "Hello Server"}`)
+		request, _ = http.NewRequest(http.MethodPost, "/api/send_message", body)
+
+		srv.ServeHTTP(response, request)
+
+		// New get message from client
+		response = httptest.NewRecorder()
+		body = &strings.Reader{}
+		request, _ = http.NewRequest(http.MethodGet, "/api/get_messages?from=0", body)
+
+		srv.ServeHTTP(response, request)
+		msgs := &[]message.ChatMessage{}
+
+		json.NewDecoder(response.Body).Decode(msgs)
+		if len(*msgs) != 1 {
+			t.Fatalf("Expect 1 message from server got %v", *msgs)
+		}
+		if (*msgs)[0].Message != "Hello Server" {
+			t.Fatalf("Expect server return message correctly, got %s", (*msgs)[0].Message)
 		}
 	})
 }
