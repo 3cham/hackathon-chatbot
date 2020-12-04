@@ -31,6 +31,8 @@ JSON Parsing:
  
 Client:
 - When the client is started, the IP address of the server must be provided beforehand
-- Call /api/register to server address to register itself with server
-- Call /api/send_message to send messages
-- Call /api/receive_message every 5s to receive new messages
+  Call /api/register to server address to register itself with server
+- In an underground go routine, the client calls /api/receive_message every 1s to receive new messages
+
+- otherwise, client wait for input form Stdin, if Enter is pushed, 
+it sends the last sentence to server with /api/send_messag
