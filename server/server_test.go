@@ -83,23 +83,24 @@ func TestGetMessage(t *testing.T)  {
 		msg := message.ChatMessage{
 			ClientName: client,
 			Message:    m,
-			Timestamp:  "1",
 		}
 		server.ProcessMessage(msg)
+
 		msg2 := message.ChatMessage{
 			ClientName: client,
 			Message:    m,
-			Timestamp:  "2",
 		}
 		server.ProcessMessage(msg2)
 
-		messages := server.GetMessageAfter("1")
+		messages := server.GetMessageAfter("0")
+		if len(messages) != 2 {
+			t.Fatalf("Server does not return messages correctly. Expected 2 message, got %v", messages)
+		}
 
+		timestamp := messages[0].Timestamp
+		messages = server.GetMessageAfter(timestamp)
 		if len(messages) != 1 {
 			t.Fatalf("Server does not return messages correctly. Expected 1 message, got %v", messages)
-		}
-		if messages[0].Message != m {
-			t.Fatalf("Server return wrong message, want %s, got %s", m, messages[0])
 		}
 	})
 }

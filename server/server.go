@@ -26,7 +26,7 @@ func (s *ChatServer) ProcessMessage(msg message.ChatMessage) error {
 			saveMsg := message.ChatMessage{
 				ClientName: msg.ClientName,
 				Message: msg.Message,
-				Timestamp: time.Time{}.String(),
+				Timestamp: time.Now().String(),
 			}
 			s.db.SaveChatMessage(saveMsg)
 		} else {
